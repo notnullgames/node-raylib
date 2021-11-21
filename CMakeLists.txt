@@ -20,13 +20,10 @@ endif()
 set(CMAKE_CXX_FLAGS_DEBUG "-g")
 set(CMAKE_CXX_FLAGS_RELEASE "-O3")
 
-# TODO: Move this to cmake/FindRaylib.cmake?
-find_package(raylib 3.5.0)
-if (NOT raylib_FOUND)
-  set(BUILD_EXAMPLES OFF CACHE BOOL "" FORCE) # don't build the supplied examples
-  set(BUILD_GAMES    OFF CACHE BOOL "" FORCE) # or games
-  add_subdirectory(vendor/raylib)
-endif()
+# always use vendored copy
+set(BUILD_EXAMPLES OFF CACHE BOOL "" FORCE) # don't build the supplied examples
+set(BUILD_GAMES    OFF CACHE BOOL "" FORCE) # or games
+add_subdirectory(vendor/raylib)
 
 # Add all the include directories.
 include_directories(${PROJECT_NAME}
