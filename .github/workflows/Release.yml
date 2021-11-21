@@ -1,0 +1,46 @@
+name: Release
+
+on: [push]
+
+jobs:
+  create_release:
+    name: Create release
+    runs-on: ubuntu-latest
+    outputs:
+      upload_url: ${{ steps.create_release.outputs.upload_url }}
+    steps:
+      - name: Create release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: Release ${{ github.ref }}
+          draft: false
+          prerelease: false
+  release_assets:
+    name: Release assets
+    needs: create_release
+    runs-on: ${{ matrix.config.os }}
+    strategy:
+      matrix:
+        config:
+          - os: ubuntu-latest
+          - os: macos-latest
+          - os: windows-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v1
+        with:
+          submodules: recursive
+      - run: mkdir dist && cp README.md LICENSE.md bin/node-raylib build/Release/node-raylib.node dist/ && cd dist && zip -r . ../node-raylib.zip
+      - name: Upload release assets
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ needs.create_release.outputs.upload_url }}
+          asset_name: node-raylib-${{ matrix.config.os }}.zip
+          asset_path: ./node-raylib.zip
+          asset_content_type: application/octet-stream
